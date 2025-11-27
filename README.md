@@ -1,4 +1,5 @@
 # KillStreaks - Ultimate PvP Enhancement Plugin
+chat gpt readme cause im too lazy to explain anything atp
 
 Transform your Minecraft server into a competitive PvP paradise with KillStreaks, the plugin that makes every player kill matter and rewards strategic combat with permanent power progression.
 
