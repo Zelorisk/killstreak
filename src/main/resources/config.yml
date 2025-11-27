@@ -1,0 +1,3 @@
+trigger:
+  # If true, pressing the drop key (Q) will trigger abilities (dash) instead of dropping items
+  drop-activates-ability: true

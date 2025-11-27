@@ -1,0 +1,15 @@
+name: KillStreaks
+main: com.example.killstreak.KSPlugin
+version: 1.0.0
+api-version: 1.21
+commands:
+  killstreak:
+    description: Killstreak commands
+    usage: /<command> <sub>
+  ks:
+    description: Short killstreak command
+    usage: /<command> <sub>
+permissions:
+  ks.admin:
+    description: Admin commands for KillStreaks
+    default: op
