@@ -15,6 +15,8 @@ public class KSPlugin extends JavaPlugin {
     private com.example.killstreak.gui.BountiesGUI bountiesGUI;
     private com.example.killstreak.gui.RecipesGUI recipesGUI;
     private DataManager dataManager;
+    private DropItemListener dropItemListener;
+    private BloodEssenceManager bloodEssenceManager;
 
     @Override
     public void onEnable() {
@@ -24,6 +26,7 @@ public class KSPlugin extends JavaPlugin {
 
         dataManager = new DataManager(this);
         bountyManager = new BountyManager(this);
+        bloodEssenceManager = new BloodEssenceManager(this);
         ksManager = new KillstreakManager(this, bountyManager);
         eventManager = new EventManager(this, bountyManager, ksManager);
         abilitiesManager = new AbilitiesManager(this);
@@ -38,7 +41,8 @@ public class KSPlugin extends JavaPlugin {
 
         getServer().getPluginManager().registerEvents(new com.example.killstreak.listeners.PlayerKillListener(this, ksManager, bountyManager), this);
         getServer().getPluginManager().registerEvents(new PlayerJoinListener(this), this);
-        getServer().getPluginManager().registerEvents(new DropItemListener(this, ksManager, cfg), this);
+        dropItemListener = new DropItemListener(this, ksManager, cfg);
+        getServer().getPluginManager().registerEvents(dropItemListener, this);
 
         KSCommand cmdExec = new KSCommand(this, ksManager, bountyManager, cfg, abilitiesManager, configGUI, bountiesGUI, recipesGUI, eventManager);
         getCommand("killstreak").setExecutor(cmdExec);
@@ -84,10 +88,20 @@ public class KSPlugin extends JavaPlugin {
     public AbilitiesManager getAbilitiesManager() { return abilitiesManager; }
     public com.example.killstreak.gui.AbilityPickGUI getAbilityPickGUI() { return abilityPickGUI; }
     public DataManager getDataManager() { return dataManager; }
+    public DropItemListener getDropItemListener() { return dropItemListener; }
+    public BloodEssenceManager getBloodEssenceManager() { return bloodEssenceManager; }
 
     private void registerRecipes() {
-        // Bounty Blade recipe
+        // Item references for craft limiting
         org.bukkit.inventory.ItemStack bountyBlade = com.example.killstreak.CustomItems.createBountyBlade(this);
+        org.bukkit.inventory.ItemStack mace = com.example.killstreak.CustomItems.createMace(this);
+        org.bukkit.inventory.ItemStack phoenixFeather = com.example.killstreak.CustomItems.createPhoenixFeather(this);
+        org.bukkit.inventory.ItemStack meteorStaff = com.example.killstreak.CustomItems.createMeteorStaff(this);
+        org.bukkit.inventory.ItemStack voidCleaver = com.example.killstreak.CustomItems.createVoidCleaver(this);
+        org.bukkit.inventory.ItemStack celestialCloak = com.example.killstreak.CustomItems.createCelestialCloak(this);
+        org.bukkit.inventory.ItemStack dashCrystal = com.example.killstreak.CustomItems.createDashCrystal(this);
+
+        // Bounty Blade recipe
         org.bukkit.NamespacedKey key = new org.bukkit.NamespacedKey(this, "bounty_blade");
         org.bukkit.inventory.ShapedRecipe r = new org.bukkit.inventory.ShapedRecipe(key, bountyBlade);
         r.shape(" N ", "NSN", " B ");
@@ -97,7 +111,6 @@ public class KSPlugin extends JavaPlugin {
         try { getServer().addRecipe(r); } catch (Exception ignored) {}
 
         // Mace recipe
-        org.bukkit.inventory.ItemStack mace = com.example.killstreak.CustomItems.createMace(this);
         org.bukkit.NamespacedKey key2 = new org.bukkit.NamespacedKey(this, "mace");
         org.bukkit.inventory.ShapedRecipe r2 = new org.bukkit.inventory.ShapedRecipe(key2, mace);
         r2.shape(" I ", "ISI", " S ");
@@ -106,9 +119,8 @@ public class KSPlugin extends JavaPlugin {
         try { getServer().addRecipe(r2); } catch (Exception ignored) {}
 
         // Phoenix Feather (revive on death)
-        org.bukkit.inventory.ItemStack feather = com.example.killstreak.CustomItems.createPhoenixFeather(this);
         org.bukkit.NamespacedKey key3 = new org.bukkit.NamespacedKey(this, "phoenix_feather");
-        org.bukkit.inventory.ShapedRecipe r3 = new org.bukkit.inventory.ShapedRecipe(key3, feather);
+        org.bukkit.inventory.ShapedRecipe r3 = new org.bukkit.inventory.ShapedRecipe(key3, phoenixFeather);
         r3.shape(" F ", "GSG", " F ");
         r3.setIngredient('F', org.bukkit.Material.FEATHER);
         r3.setIngredient('G', org.bukkit.Material.GOLD_INGOT);
@@ -116,9 +128,8 @@ public class KSPlugin extends JavaPlugin {
         try { getServer().addRecipe(r3); } catch (Exception ignored) {}
 
         // Meteor Staff (summon meteors)
-        org.bukkit.inventory.ItemStack staff = com.example.killstreak.CustomItems.createMeteorStaff(this);
         org.bukkit.NamespacedKey key5 = new org.bukkit.NamespacedKey(this, "meteor_staff");
-        org.bukkit.inventory.ShapedRecipe r5 = new org.bukkit.inventory.ShapedRecipe(key5, staff);
+        org.bukkit.inventory.ShapedRecipe r5 = new org.bukkit.inventory.ShapedRecipe(key5, meteorStaff);
         r5.shape(" F ", "BRB", " N ");
         r5.setIngredient('F', org.bukkit.Material.FIRE_CHARGE);
         r5.setIngredient('B', org.bukkit.Material.BLAZE_POWDER);
@@ -127,26 +138,23 @@ public class KSPlugin extends JavaPlugin {
         try { getServer().addRecipe(r5); } catch (Exception ignored) {}
 
         // Void Cleaver
-        org.bukkit.inventory.ItemStack cleaver = com.example.killstreak.CustomItems.createVoidCleaver(this);
         org.bukkit.NamespacedKey key6 = new org.bukkit.NamespacedKey(this, "void_cleaver");
-        org.bukkit.inventory.ShapedRecipe r6 = new org.bukkit.inventory.ShapedRecipe(key6, cleaver);
+        org.bukkit.inventory.ShapedRecipe r6 = new org.bukkit.inventory.ShapedRecipe(key6, voidCleaver);
         r6.shape("NN ", "NSN", " S ");
         r6.setIngredient('N', org.bukkit.Material.NETHERITE_INGOT);
         r6.setIngredient('S', org.bukkit.Material.STICK);
         try { getServer().addRecipe(r6); } catch (Exception ignored) {}
 
         // Celestial Cloak
-        org.bukkit.inventory.ItemStack cloak = com.example.killstreak.CustomItems.createCelestialCloak(this);
         org.bukkit.NamespacedKey key7 = new org.bukkit.NamespacedKey(this, "celestial_cloak");
-        org.bukkit.inventory.ShapedRecipe r7 = new org.bukkit.inventory.ShapedRecipe(key7, cloak);
-        r7.shape("EEE", "ELE", "III");
-        r7.setIngredient('E', org.bukkit.Material.ELYTRA);
+        org.bukkit.inventory.ShapedRecipe r7 = new org.bukkit.inventory.ShapedRecipe(key7, celestialCloak);
+        r7.shape("DDD", "DLD", "GGG");
+        r7.setIngredient('D', org.bukkit.Material.DIAMOND);
         r7.setIngredient('L', org.bukkit.Material.NETHER_STAR);
-        r7.setIngredient('I', org.bukkit.Material.IRON_INGOT);
+        r7.setIngredient('G', org.bukkit.Material.GOLD_BLOCK);
         try { getServer().addRecipe(r7); } catch (Exception ignored) {}
 
         // Dash Crystal (limited crafts)
-        org.bukkit.inventory.ItemStack dashCrystal = com.example.killstreak.CustomItems.createDashCrystal(this);
         org.bukkit.NamespacedKey key8 = new org.bukkit.NamespacedKey(this, "dash_crystal");
         org.bukkit.inventory.ShapedRecipe r8 = new org.bukkit.inventory.ShapedRecipe(key8, dashCrystal);
         r8.shape(" A ", "ASA", " A ");
@@ -160,13 +168,21 @@ public class KSPlugin extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new org.bukkit.event.Listener() {
             @org.bukkit.event.EventHandler
             public void onCraft(org.bukkit.event.inventory.CraftItemEvent e) {
-                if (e.getRecipe().getResult().isSimilar(dashCrystal)) {
-                    DropItemListener dropListener = new DropItemListener(KSPlugin.get(), ksManager, cfg);
-                    if (!dropListener.canCraftDashCrystal()) {
+                org.bukkit.inventory.ItemStack result = e.getRecipe().getResult();
+                String itemType = "";
+                if (result.isSimilar(dashCrystal)) itemType = "dashcrystal";
+                else if (result.isSimilar(bountyBlade)) itemType = "bountyblade";
+                else if (result.isSimilar(mace)) itemType = "mace";
+                else if (result.isSimilar(phoenixFeather)) itemType = "phoenixfeather";
+                else if (result.isSimilar(meteorStaff)) itemType = "meteorstaff";
+                else if (result.isSimilar(voidCleaver)) itemType = "voidcleaver";
+                else if (result.isSimilar(celestialCloak)) itemType = "celestialcloak";
+                if (!itemType.isEmpty()) {
+                    if (!dropItemListener.canCraft(itemType)) {
                         e.setCancelled(true);
-                        e.getWhoClicked().sendMessage("\u00A7cNo more Dash Crystals can be crafted!");
+                        e.getWhoClicked().sendMessage("\u00A7cNo more " + itemType + "s can be crafted!");
                     } else {
-                        dropListener.decrementDashCrystalCrafts();
+                        dropItemListener.decrementCraft(itemType);
                     }
                 }
             }

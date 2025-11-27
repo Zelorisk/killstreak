@@ -13,14 +13,12 @@ public class CustomItems {
         ItemStack it = new ItemStack(Material.NETHERITE_SWORD);
         ItemMeta m = it.getItemMeta();
         m.setDisplayName("\u00A7bBounty Blade");
-        m.setLore(java.util.List.of("Sharpness VI, Fire II, Knockback II"));
+        m.setLore(java.util.List.of("Sharpness VI, Fire II"));
         // add default enchants
         var sharp = org.bukkit.enchantments.Enchantment.getByKey(org.bukkit.NamespacedKey.minecraft("sharpness"));
         var fire = org.bukkit.enchantments.Enchantment.getByKey(org.bukkit.NamespacedKey.minecraft("fire_aspect"));
-        var kb = org.bukkit.enchantments.Enchantment.getByKey(org.bukkit.NamespacedKey.minecraft("knockback"));
         if (sharp != null) m.addEnchant(sharp, 6, true);
         if (fire != null) m.addEnchant(fire, 2, true);
-        if (kb != null) m.addEnchant(kb, 2, true);
         // mark as custom
         m.getPersistentDataContainer().set(key(plugin, "bounty_blade"), PersistentDataType.BYTE, (byte)1);
         it.setItemMeta(m);
@@ -31,7 +29,7 @@ public class CustomItems {
         ItemStack it = new ItemStack(Material.IRON_AXE);
         ItemMeta m = it.getItemMeta();
         m.setDisplayName("\u00A77Mace");
-        m.setLore(java.util.List.of("A heavy crushing weapon"));
+        m.setLore(java.util.List.of("A heavy crushing weapon with lifesteal"));
         m.getPersistentDataContainer().set(key(plugin, "mace"), PersistentDataType.BYTE, (byte)1);
         it.setItemMeta(m);
         return it;

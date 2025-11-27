@@ -21,6 +21,12 @@ public class DropItemListener implements Listener {
     private final Map<UUID, Long> dashProtection = new HashMap<>();
     private final Map<UUID, Long> celestialCloakCooldown = new HashMap<>();
 
+    private int bountyBladeCrafts = 3; // Maximum crafts allowed
+    private int maceCrafts = 3; // Maximum crafts allowed
+    private int phoenixFeatherCrafts = 3; // Maximum crafts allowed
+    private int meteorStaffCrafts = 3; // Maximum crafts allowed
+    private int voidCleaverCrafts = 3; // Maximum crafts allowed
+    private int celestialCloakCrafts = 3; // Maximum crafts allowed
     private int dashCrystalCrafts = 3; // Maximum crafts allowed
 
     public DropItemListener(KSPlugin plugin, KillstreakManager ksManager, ConfigManager cfg) {
@@ -151,29 +157,99 @@ public class DropItemListener implements Listener {
     }
 
     @EventHandler
-    public void onDashCrystalDestroyed(org.bukkit.event.entity.ItemDespawnEvent e) {
-        if (CustomItems.isCustom(e.getEntity().getItemStack(), plugin, "dash_crystal")) {
+    public void onCustomItemDespawn(org.bukkit.event.entity.ItemDespawnEvent e) {
+        org.bukkit.inventory.ItemStack stack = e.getEntity().getItemStack();
+        if (CustomItems.isCustom(stack, plugin, "dash_crystal") ||
+            CustomItems.isCustom(stack, plugin, "bounty_blade") ||
+            CustomItems.isCustom(stack, plugin, "mace") ||
+            CustomItems.isCustom(stack, plugin, "phoenix_feather") ||
+            CustomItems.isCustom(stack, plugin, "meteor_staff") ||
+            CustomItems.isCustom(stack, plugin, "void_cleaver") ||
+            CustomItems.isCustom(stack, plugin, "celestial_cloak")) {
             e.setCancelled(true); // Prevent despawning
         }
     }
 
     @EventHandler
-    public void onDashCrystalBurn(org.bukkit.event.entity.EntityDamageEvent e) {
+    public void onCustomItemDamage(org.bukkit.event.entity.EntityDamageEvent e) {
         if (e.getEntity() instanceof org.bukkit.entity.Item) {
             org.bukkit.entity.Item item = (org.bukkit.entity.Item) e.getEntity();
-            if (CustomItems.isCustom(item.getItemStack(), plugin, "dash_crystal") && e.getCause() == org.bukkit.event.entity.EntityDamageEvent.DamageCause.FIRE) {
-                e.setCancelled(true); // Prevent burning
-                Bukkit.broadcastMessage("\u00A7dA Dash Crystal was destroyed! A craft slot is now available.");
-                dashCrystalCrafts++;
+            org.bukkit.inventory.ItemStack stack = item.getItemStack();
+            if (CustomItems.isCustom(stack, plugin, "dash_crystal")) {
+                e.setCancelled(true);
+                if (e.getFinalDamage() >= item.getHealth()) {
+                    Bukkit.broadcastMessage("\u00A7dA Dash Crystal was destroyed! A craft slot is now available.");
+                    dashCrystalCrafts++;
+                    item.remove();
+                }
+            } else if (CustomItems.isCustom(stack, plugin, "bounty_blade")) {
+                e.setCancelled(true);
+                if (e.getFinalDamage() >= item.getHealth()) {
+                    Bukkit.broadcastMessage("\u00A7dA Bounty Blade was destroyed! A craft slot is now available.");
+                    bountyBladeCrafts++;
+                    item.remove();
+                }
+            } else if (CustomItems.isCustom(stack, plugin, "mace")) {
+                e.setCancelled(true);
+                if (e.getFinalDamage() >= item.getHealth()) {
+                    Bukkit.broadcastMessage("\u00A7dA Mace was destroyed! A craft slot is now available.");
+                    maceCrafts++;
+                    item.remove();
+                }
+            } else if (CustomItems.isCustom(stack, plugin, "phoenix_feather")) {
+                e.setCancelled(true);
+                if (e.getFinalDamage() >= item.getHealth()) {
+                    Bukkit.broadcastMessage("\u00A7dA Phoenix Feather was destroyed! A craft slot is now available.");
+                    phoenixFeatherCrafts++;
+                    item.remove();
+                }
+            } else if (CustomItems.isCustom(stack, plugin, "meteor_staff")) {
+                e.setCancelled(true);
+                if (e.getFinalDamage() >= item.getHealth()) {
+                    Bukkit.broadcastMessage("\u00A7dA Meteor Staff was destroyed! A craft slot is now available.");
+                    meteorStaffCrafts++;
+                    item.remove();
+                }
+            } else if (CustomItems.isCustom(stack, plugin, "void_cleaver")) {
+                e.setCancelled(true);
+                if (e.getFinalDamage() >= item.getHealth()) {
+                    Bukkit.broadcastMessage("\u00A7dA Void Cleaver was destroyed! A craft slot is now available.");
+                    voidCleaverCrafts++;
+                    item.remove();
+                }
+            } else if (CustomItems.isCustom(stack, plugin, "celestial_cloak")) {
+                e.setCancelled(true);
+                if (e.getFinalDamage() >= item.getHealth()) {
+                    Bukkit.broadcastMessage("\u00A7dA Celestial Cloak was destroyed! A craft slot is now available.");
+                    celestialCloakCrafts++;
+                    item.remove();
+                }
             }
         }
     }
 
-    public boolean canCraftDashCrystal() {
-        return dashCrystalCrafts > 0;
+    public boolean canCraft(String item) {
+        switch (item) {
+            case "bountyblade": return bountyBladeCrafts > 0;
+            case "mace": return maceCrafts > 0;
+            case "phoenixfeather": return phoenixFeatherCrafts > 0;
+            case "meteorstaff": return meteorStaffCrafts > 0;
+            case "voidcleaver": return voidCleaverCrafts > 0;
+            case "celestialcloak": return celestialCloakCrafts > 0;
+            case "dashcrystal": return dashCrystalCrafts > 0;
+            default: return true;
+        }
     }
 
-    public void decrementDashCrystalCrafts() {
-        dashCrystalCrafts--;
+    public void decrementCraft(String item) {
+        switch (item) {
+            case "bountyblade": bountyBladeCrafts--; break;
+            case "mace": maceCrafts--; break;
+            case "phoenixfeather": phoenixFeatherCrafts--; break;
+            case "meteorstaff": meteorStaffCrafts--; break;
+            case "voidcleaver": voidCleaverCrafts--; break;
+            case "celestialcloak": celestialCloakCrafts--; break;
+            case "dashcrystal": dashCrystalCrafts--; break;
+        }
     }
 }

@@ -29,6 +29,7 @@ public class CustomItemListener implements Listener {
     private final Random rand = new Random();
     private final java.util.Map<java.util.UUID, Long> meteorCooldown = new ConcurrentHashMap<>();
     private final java.util.Map<java.util.UUID, Integer> dashCrystalBackup = new ConcurrentHashMap<>();
+    private final java.util.Map<java.util.UUID, Boolean> hadDashCrystalOnDeath = new ConcurrentHashMap<>();
 
     public CustomItemListener(KSPlugin plugin) {
         this.plugin = plugin;
@@ -158,6 +159,15 @@ public class CustomItemListener implements Listener {
     @EventHandler
     public void onPlayerDeath(org.bukkit.event.entity.PlayerDeathEvent e) {
         Player p = e.getEntity();
+        // Check if player has Dash Crystal
+        boolean hasCrystal = false;
+        for (org.bukkit.inventory.ItemStack it : p.getInventory().getContents()) {
+            if (it != null && CustomItems.isCustom(it, plugin, "dash_crystal")) {
+                hasCrystal = true;
+                break;
+            }
+        }
+        hadDashCrystalOnDeath.put(p.getUniqueId(), hasCrystal);
         // Remove Dash Crystal from drops without duplicating
         for (org.bukkit.inventory.ItemStack it : new java.util.ArrayList<>(e.getDrops())) {
             if (it == null) continue;
@@ -168,8 +178,50 @@ public class CustomItemListener implements Listener {
     }
 
     @EventHandler
+    public void onEntityDamageByEntity(org.bukkit.event.entity.EntityDamageByEntityEvent e) {
+        if (!(e.getDamager() instanceof Player)) return;
+        Player attacker = (Player) e.getDamager();
+        ItemStack weapon = attacker.getInventory().getItemInMainHand();
+        if (weapon != null && CustomItems.isCustom(weapon, plugin, "mace")) {
+            // Powerful Mace effects: 25% lifesteal + knockback + extra damage
+            double heal = e.getFinalDamage() * 0.25;
+            double newHealth = Math.min(attacker.getMaxHealth(), attacker.getHealth() + heal);
+            attacker.setHealth(newHealth);
+            attacker.getWorld().spawnParticle(org.bukkit.Particle.HEART, attacker.getLocation().add(0, 1, 0), 3, 0.2, 0.2, 0.2, 0.1);
+
+            // Knockback effect
+            if (e.getEntity() instanceof Player) {
+                Player victim = (Player) e.getEntity();
+                victim.setVelocity(attacker.getLocation().getDirection().multiply(1.5).setY(0.5));
+            }
+
+            // Extra damage effect (bypass armor)
+            e.setDamage(e.getDamage() + 2.0);
+
+            // Visual effects
+            attacker.getWorld().spawnParticle(org.bukkit.Particle.CRIT, e.getEntity().getLocation().add(0, 1, 0), 10, 0.3, 0.3, 0.3, 0.1);
+            attacker.getWorld().playSound(attacker.getLocation(), org.bukkit.Sound.ENTITY_PLAYER_ATTACK_CRIT, 0.8f, 1.2f);
+        }
+    }
+
+    @EventHandler
     public void onPlayerRespawn(org.bukkit.event.player.PlayerRespawnEvent e) {
-        // Dash Crystals are no longer restored automatically to prevent duplication
+        Player p = e.getPlayer();
+        Boolean hadCrystal = hadDashCrystalOnDeath.remove(p.getUniqueId());
+        if (hadCrystal != null && hadCrystal) {
+            // Check if player already has a dash crystal (to prevent duplication)
+            boolean alreadyHasCrystal = false;
+            for (org.bukkit.inventory.ItemStack it : p.getInventory().getContents()) {
+                if (it != null && CustomItems.isCustom(it, plugin, "dash_crystal")) {
+                    alreadyHasCrystal = true;
+                    break;
+                }
+            }
+            if (!alreadyHasCrystal) {
+                // Restore Dash Crystal
+                p.getInventory().addItem(CustomItems.createDashCrystal(plugin));
+            }
+        }
     }
 
     @EventHandler

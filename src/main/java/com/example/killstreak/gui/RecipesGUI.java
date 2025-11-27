@@ -38,14 +38,14 @@ public class RecipesGUI implements Listener {
         // Bounty Blade
         ItemStack bountyBlade = com.example.killstreak.CustomItems.createBountyBlade(plugin);
         ItemMeta bbm = bountyBlade.getItemMeta();
-        if (bbm != null) bbm.setLore(java.util.List.of(ChatColor.GOLD + "Sharpness VI, Fire II, Knockback II", ChatColor.GRAY + "Recipe: NETHERITE_INGOT, STICK, BLAZE_POWDER"));
+        if (bbm != null) bbm.setLore(java.util.List.of(ChatColor.GOLD + "Sharpness VI, Fire II", ChatColor.GRAY + "Recipe: NETHERITE_INGOT, STICK, BLAZE_POWDER"));
         bountyBlade.setItemMeta(bbm);
         inv.setItem(10, bountyBlade);
 
         // Mace
         ItemStack mace = com.example.killstreak.CustomItems.createMace(plugin);
         ItemMeta mm = mace.getItemMeta();
-        if (mm != null) mm.setLore(java.util.List.of(ChatColor.DARK_GRAY + "Custom melee weapon", ChatColor.GRAY + "Recipe: IRON_INGOT, STICK"));
+        if (mm != null) mm.setLore(java.util.List.of(ChatColor.DARK_GRAY + "Custom melee weapon with lifesteal", ChatColor.GRAY + "Recipe: IRON_INGOT, STICK, NETHER_STAR"));
         mace.setItemMeta(mm);
         inv.setItem(12, mace);
 
@@ -66,10 +66,19 @@ public class RecipesGUI implements Listener {
         inv.setItem(28, staff);
         // New custom items
         ItemStack cleaver = com.example.killstreak.CustomItems.createVoidCleaver(plugin);
+        ItemMeta cm = cleaver.getItemMeta();
+        if (cm != null) cm.setLore(java.util.List.of(ChatColor.DARK_RED + "High armor-penetration cleaver", ChatColor.GRAY + "Recipe: NETHERITE_INGOT, STICK"));
+        cleaver.setItemMeta(cm);
         inv.setItem(30, cleaver);
         ItemStack cloak = com.example.killstreak.CustomItems.createCelestialCloak(plugin);
+        ItemMeta clm = cloak.getItemMeta();
+        if (clm != null) clm.setLore(java.util.List.of(ChatColor.AQUA + "Grants Elytra flight with 2x speed", ChatColor.GRAY + "Recipe: DIAMOND, NETHER_STAR, GOLD_BLOCK"));
+        cloak.setItemMeta(clm);
         inv.setItem(32, cloak);
         ItemStack dashCrystal = com.example.killstreak.CustomItems.createDashCrystal(plugin);
+        ItemMeta dcm = dashCrystal.getItemMeta();
+        if (dcm != null) dcm.setLore(java.util.List.of(ChatColor.YELLOW + "Grants dash and teleport abilities. Cannot be lost on death.", ChatColor.GRAY + "Recipe: AMETHYST_SHARD, NETHER_STAR"));
+        dashCrystal.setItemMeta(dcm);
         inv.setItem(34, dashCrystal);
 
         // Info item
@@ -85,9 +94,9 @@ public class RecipesGUI implements Listener {
 
         // Close button
         ItemStack close = new ItemStack(Material.BARRIER);
-        ItemMeta cm = close.getItemMeta();
-        cm.setDisplayName(ChatColor.RED + "Close");
-        close.setItemMeta(cm);
+        ItemMeta closeMeta = close.getItemMeta();
+        closeMeta.setDisplayName(ChatColor.RED + "Close");
+        close.setItemMeta(closeMeta);
         inv.setItem(49, close);
 
         p.openInventory(inv);
@@ -125,9 +134,11 @@ public class RecipesGUI implements Listener {
                 preview.setItem(0, com.example.killstreak.CustomItems.createBountyBlade(plugin));
             } else if (name.contains("Mace") || name.contains("Mace (custom)")) {
                 preview.setItem(1, new org.bukkit.inventory.ItemStack(org.bukkit.Material.IRON_INGOT));
+                preview.setItem(2, new org.bukkit.inventory.ItemStack(org.bukkit.Material.NETHER_STAR));
                 preview.setItem(3, new org.bukkit.inventory.ItemStack(org.bukkit.Material.IRON_INGOT));
                 preview.setItem(4, new org.bukkit.inventory.ItemStack(org.bukkit.Material.STICK));
                 preview.setItem(5, new org.bukkit.inventory.ItemStack(org.bukkit.Material.IRON_INGOT));
+                preview.setItem(7, new org.bukkit.inventory.ItemStack(org.bukkit.Material.STICK));
                 preview.setItem(0, com.example.killstreak.CustomItems.createMace(plugin));
             } else if (name.contains("Phoenix Feather")) {
                 preview.setItem(1, new org.bukkit.inventory.ItemStack(org.bukkit.Material.FEATHER));
@@ -145,23 +156,31 @@ public class RecipesGUI implements Listener {
                 preview.setItem(7, new org.bukkit.inventory.ItemStack(org.bukkit.Material.NETHER_STAR));
                 preview.setItem(0, com.example.killstreak.CustomItems.createMeteorStaff(plugin));
             } else if (name.contains("Void Cleaver") || name.contains("Void Cleaver")) {
-                preview.setItem(0, com.example.killstreak.CustomItems.createVoidCleaver(plugin));
-                preview.setItem(0, com.example.killstreak.CustomItems.createVoidCleaver(plugin));
-                // set a sample set of ingredients (NETHERITE_INGOT and STICK)
+                preview.setItem(0, new org.bukkit.inventory.ItemStack(org.bukkit.Material.NETHERITE_INGOT));
                 preview.setItem(1, new org.bukkit.inventory.ItemStack(org.bukkit.Material.NETHERITE_INGOT));
                 preview.setItem(3, new org.bukkit.inventory.ItemStack(org.bukkit.Material.NETHERITE_INGOT));
                 preview.setItem(4, new org.bukkit.inventory.ItemStack(org.bukkit.Material.STICK));
                 preview.setItem(5, new org.bukkit.inventory.ItemStack(org.bukkit.Material.NETHERITE_INGOT));
                 preview.setItem(7, new org.bukkit.inventory.ItemStack(org.bukkit.Material.STICK));
+                preview.setItem(10, com.example.killstreak.CustomItems.createVoidCleaver(plugin));
             } else if (name.contains("Celestial Cloak") || name.contains("Celestial Cloak")) {
-                preview.setItem(0, com.example.killstreak.CustomItems.createCelestialCloak(plugin));
-                preview.setItem(1, new org.bukkit.inventory.ItemStack(org.bukkit.Material.ELYTRA));
-                preview.setItem(2, new org.bukkit.inventory.ItemStack(org.bukkit.Material.ELYTRA));
-                preview.setItem(3, new org.bukkit.inventory.ItemStack(org.bukkit.Material.ELYTRA));
+                preview.setItem(0, new org.bukkit.inventory.ItemStack(org.bukkit.Material.DIAMOND));
+                preview.setItem(1, new org.bukkit.inventory.ItemStack(org.bukkit.Material.DIAMOND));
+                preview.setItem(2, new org.bukkit.inventory.ItemStack(org.bukkit.Material.DIAMOND));
+                preview.setItem(3, new org.bukkit.inventory.ItemStack(org.bukkit.Material.DIAMOND));
                 preview.setItem(4, new org.bukkit.inventory.ItemStack(org.bukkit.Material.NETHER_STAR));
-                preview.setItem(5, new org.bukkit.inventory.ItemStack(org.bukkit.Material.ELYTRA));
-                preview.setItem(7, new org.bukkit.inventory.ItemStack(org.bukkit.Material.IRON_INGOT));
-                preview.setItem(8, new org.bukkit.inventory.ItemStack(org.bukkit.Material.IRON_INGOT));
+                preview.setItem(5, new org.bukkit.inventory.ItemStack(org.bukkit.Material.DIAMOND));
+                preview.setItem(6, new org.bukkit.inventory.ItemStack(org.bukkit.Material.GOLD_BLOCK));
+                preview.setItem(7, new org.bukkit.inventory.ItemStack(org.bukkit.Material.GOLD_BLOCK));
+                preview.setItem(8, new org.bukkit.inventory.ItemStack(org.bukkit.Material.GOLD_BLOCK));
+                preview.setItem(10, com.example.killstreak.CustomItems.createCelestialCloak(plugin));
+            } else if (name.contains("Dash Crystal")) {
+                preview.setItem(1, new org.bukkit.inventory.ItemStack(org.bukkit.Material.AMETHYST_SHARD));
+                preview.setItem(3, new org.bukkit.inventory.ItemStack(org.bukkit.Material.AMETHYST_SHARD));
+                preview.setItem(4, new org.bukkit.inventory.ItemStack(org.bukkit.Material.NETHER_STAR));
+                preview.setItem(5, new org.bukkit.inventory.ItemStack(org.bukkit.Material.AMETHYST_SHARD));
+                preview.setItem(7, new org.bukkit.inventory.ItemStack(org.bukkit.Material.AMETHYST_SHARD));
+                preview.setItem(0, com.example.killstreak.CustomItems.createDashCrystal(plugin));
             }
             p.openInventory(preview);
             previewOpen.put(p.getUniqueId(), preview);

@@ -98,21 +98,24 @@ public class KillstreakManager {
             if (kb != null) m.addEnchant(kb, 2, true);
             sword.setItemMeta(m);
             p.getInventory().addItem(sword);
+            p.sendMessage("\u00A7aKillstreak " + streak + ": +5 hearts and Killstreak Sword!");
         } else if (streak >= 6) {
             hasDash.put(p.getUniqueId(), true);
-            p.sendMessage("\u00A7eYou unlocked Dash ability! Use the configured trigger.");
+            p.sendMessage("\u00A7eKillstreak " + streak + ": You unlocked Dash ability! Press Q to dash.");
         } else if (streak >= 4) {
-            PotionEffectType strength = PotionEffectType.getByName("INCREASE_DAMAGE");
-            PotionEffectType fireRes = PotionEffectType.getByName("FIRE_RESISTANCE");
-            PotionEffectType speed = PotionEffectType.getByName("SPEED");
+            PotionEffectType strength = PotionEffectType.STRENGTH;
+            PotionEffectType fireRes = PotionEffectType.FIRE_RESISTANCE;
+            PotionEffectType speed = PotionEffectType.SPEED;
             if (strength != null) p.addPotionEffect(new PotionEffect(strength, dur, 1, false, false));
             if (fireRes != null) p.addPotionEffect(new PotionEffect(fireRes, dur, 0, false, false));
             if (speed != null) p.addPotionEffect(new PotionEffect(speed, dur, 1, false, false));
+            p.sendMessage("\u00A7aKillstreak " + streak + ": Strength II, Fire Resistance, Speed II!");
         } else if (streak >= 2) {
-            PotionEffectType strength = PotionEffectType.getByName("INCREASE_DAMAGE");
-            PotionEffectType fireRes = PotionEffectType.getByName("FIRE_RESISTANCE");
+            PotionEffectType strength = PotionEffectType.STRENGTH;
+            PotionEffectType fireRes = PotionEffectType.FIRE_RESISTANCE;
             if (strength != null) p.addPotionEffect(new PotionEffect(strength, dur, 0, false, false));
             if (fireRes != null) p.addPotionEffect(new PotionEffect(fireRes, dur, 0, false, false));
+            p.sendMessage("\u00A7aKillstreak " + streak + ": Strength I, Fire Resistance!");
         }
     }
 

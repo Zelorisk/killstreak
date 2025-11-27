@@ -12,6 +12,8 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.entity.Player;
+import java.util.List;
+import java.util.ArrayList;
 
 public class PlayerKillListener implements Listener {
     private final KSPlugin plugin;
@@ -28,7 +30,10 @@ public class PlayerKillListener implements Listener {
     public void onPlayerDeath(PlayerDeathEvent e) {
         Player victim = e.getEntity();
         Player killer = victim.getKiller();
-        if (killer == null) {
+
+        // Only award killstreaks and bounties for player-vs-player kills
+        // victim.getKiller() returns null for non-player causes (entities, environment, etc.)
+        if (killer == null || !(killer instanceof Player)) {
             ksManager.reset(victim.getUniqueId());
             return;
         }
@@ -40,20 +45,55 @@ public class PlayerKillListener implements Listener {
             return;
         }
         ksManager.addKill(killer, victim);
+        // Give blood essence for the kill
+        plugin.getBloodEssenceManager().addEssence(killer.getUniqueId(), 10);
+
+        // Check if victim has valuable items for bounty
+        plugin.getBountyManager().checkInventoryForBounty(victim);
+
         // reward killer if victim had a bounty
         int bounty = bountyManager.getBounty(victim.getUniqueId());
         if (bounty > 0) {
-            // Example rewarding: netherite ingots, gold blocks, enchanted golden apple, and a custom sword
-            ItemStack netherite = new ItemStack(Material.NETHERITE_INGOT, Math.min(8, Math.max(1, bounty/100)));
-            ItemStack goldBlocks = new ItemStack(Material.GOLD_BLOCK, Math.min(8, Math.max(1, bounty/200)));
-            ItemStack egap = new ItemStack(Material.ENCHANTED_GOLDEN_APPLE, 1);
-            ItemStack sword = com.example.killstreak.CustomItems.createBountyBlade(this.plugin);
+            // Give rewards based on bounty value
+            List<ItemStack> rewards = new ArrayList<>();
+            String rewardMessage = "";
 
-            killer.getInventory().addItem(netherite);
-            killer.getInventory().addItem(goldBlocks);
-            killer.getInventory().addItem(egap);
-            killer.getInventory().addItem(sword);
-            killer.sendMessage("\u00A7aYou collected a bounty of " + bounty + "! Rewards granted.");
+            if (bounty >= 5000) {
+                rewards.add(new ItemStack(Material.GOLD_BLOCK, 64));
+                rewards.add(new ItemStack(Material.DIAMOND, 32));
+                rewards.add(com.example.killstreak.CustomItems.createBountyBlade(this.plugin));
+                rewards.add(com.example.killstreak.CustomItems.createDashCrystal(this.plugin));
+                rewardMessage = "64 Gold Blocks, 32 Diamonds, Bounty Blade, Dash Crystal!";
+            } else if (bounty >= 2500) {
+                rewards.add(new ItemStack(Material.GOLD_BLOCK, 32));
+                rewards.add(new ItemStack(Material.DIAMOND, 16));
+                rewards.add(com.example.killstreak.CustomItems.createBountyBlade(this.plugin));
+                rewardMessage = "32 Gold Blocks, 16 Diamonds, Bounty Blade!";
+            } else if (bounty >= 1000) {
+                rewards.add(new ItemStack(Material.GOLD_BLOCK, 16));
+                rewards.add(new ItemStack(Material.DIAMOND, 8));
+                rewards.add(com.example.killstreak.CustomItems.createPhoenixFeather(this.plugin));
+                rewardMessage = "16 Gold Blocks, 8 Diamonds, Phoenix Feather!";
+            } else if (bounty >= 500) {
+                rewards.add(new ItemStack(Material.GOLD_BLOCK, 8));
+                rewards.add(new ItemStack(Material.DIAMOND, 4));
+                rewards.add(com.example.killstreak.CustomItems.createMace(this.plugin));
+                rewardMessage = "8 Gold Blocks, 4 Diamonds, Mace!";
+            } else {
+                rewards.add(new ItemStack(Material.GOLD_BLOCK, 4));
+                rewards.add(new ItemStack(Material.DIAMOND, 2));
+                rewardMessage = "4 Gold Blocks, 2 Diamonds!";
+            }
+
+            // Give rewards to killer
+            for (ItemStack reward : rewards) {
+                killer.getInventory().addItem(reward);
+            }
+
+            killer.sendMessage("\u00A7aYou collected a bounty! Rewards: " + rewardMessage);
+            killer.getWorld().spawnParticle(org.bukkit.Particle.TOTEM_OF_UNDYING, killer.getLocation().add(0, 2, 0), 50, 0.5, 0.5, 0.5, 0.1);
+            killer.playSound(killer.getLocation(), org.bukkit.Sound.ENTITY_PLAYER_LEVELUP, 1f, 1f);
+
             bountyManager.clearBounty(victim.getUniqueId());
         }
         // reset victim
